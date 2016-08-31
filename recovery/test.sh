@@ -1,0 +1,11 @@
+while true;
+  do tm=`date +%s%3N`;
+   name=`hostname`;
+   df=`df | tail -n +2 | awk '{print $5}'| sort -nr| head -n1|awk '{print $1}'`;
+   mem=`free | awk 'FNR == 2 {print $3/($3+$4)*100}'| awk '{printf ("%1.f"),$1}'`;
+   cpu=`top -d 0.5 -b -n2 | grep "Cpu(s)"|tail -n 1 | awk '{print 100-$8}'`;
+   echo "system/diskFileSystem" "timestamp:"$tm,"hostname:"$name,"maxDiskUsage:"$df;
+   echo "system/memory" "timestamp:"$tm,"hostname:"$name,"memUsage:"$mem"%";
+   echo "system/cpuUsage" "timestamp:"$tm,"hostname:"$name,"cpuUsage:"$cpu"%";
+   sleep 1;
+  done;

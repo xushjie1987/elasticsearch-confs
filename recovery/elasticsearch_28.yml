@@ -1,0 +1,90 @@
+# ======================== Elasticsearch Configuration =========================
+# Getting more information from https://www.elastic.co/guide/en/elasticsearch/reference/2.1/setup-configuration.html
+# NOTE: Elasticsearch comes with reasonable defaults for most settings.
+#       Before you set out to tweak and tune the configuration, make sure you
+#       understand what are you trying to accomplish and the consequences.
+#
+# The primary way of configuring a node is via this file. This template lists
+# the most important settings you may want to configure for a production cluster.
+#
+# Please see the documentation for further information on configuration options:
+#
+# Node
+node:
+    name: node-2
+    master: false
+    data: false
+
+# Data
+path:
+    data: /data/vdb1/es-2.1.1/clusters/tribe_1/data
+
+# Log
+path:
+    logs: /data/vdb1/es-2.1.1/clusters/tribe_1/logs
+
+# Bootstrap
+bootstrap:
+    mlockall: true
+
+# Network
+network:
+    host: 0.0.0.0
+
+# HTTP
+http:
+    port: 9200
+
+# Transport
+transport:
+    tcp:
+        port: 9300
+
+# Tribe
+tribe:
+    t1:
+        # 配置文件路径
+        path.conf: /data/vdb1/es-2.1.1/clusters/tribe_1/conf
+        # 集群名称
+        cluster.name: tribe1
+        # 发现模块ping超时，默认3s
+        discovery.zen.ping_timeout: 30s
+        # 节点join到集群向master发送ping的响应超时，默认ping timeout的20倍
+        discovery.zen.join_timeout: 5m
+        # 集群中各节点的单播地址，host:port或者host
+        discovery.zen.ping.unicast.hosts: ["es1:9300"]
+        # 
+        network.bind_host: 0.0.0.0
+        #
+        network.publish_host: 10.46.176.126
+    t3:
+        # 配置文件路径
+        path.conf: /data/vdb1/es-2.1.1/clusters/tribe_1/conf
+        # 集群名称
+        cluster.name: tribe3
+        # 发现模块ping超时，默认3s
+        discovery.zen.ping_timeout: 30s
+        # 节点join到集群向master发送ping的响应超时，默认ping timeout的20倍
+        discovery.zen.join_timeout: 5m
+        # 集群中各节点的单播地址，host:port或者host
+        discovery.zen.ping.unicast.hosts: ["es3:9300"]
+        #
+        network.bind_host: 0.0.0.0
+        #
+        network.publish_host: 10.46.176.126
+    blocks:
+        # 阻塞所有write操作
+        write: true
+        # 阻塞所有metadata操作
+        metadata: false
+    # 多个集群中存在同名index时的冲突处理，默认any，任意选一个
+    on_conflict: prefer_t1
+
+# Marvel
+marvel:
+    agent:
+        exporters:
+            id1:
+                type: http
+                host: ["http://kafka3:9201"]
+

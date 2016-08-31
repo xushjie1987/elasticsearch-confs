@@ -1,0 +1,358 @@
+
+# ======================== Elasticsearch Configuration =========================
+# Getting more information from https://www.elastic.co/guide/en/elasticsearch/reference/2.1/setup-configuration.html
+# NOTE: Elasticsearch comes with reasonable defaults for most settings.
+#       Before you set out to tweak and tune the configuration, make sure you
+#       understand what are you trying to accomplish and the consequences.
+#
+# The primary way of configuring a node is via this file. This template lists
+# the most important settings you may want to configure for a production cluster.
+#
+# Please see the documentation for further information on configuration options:
+#
+# ---------------------------------- Cluster -----------------------------------
+#
+# Use a descriptive name for your cluster:
+#
+cluster:
+    name: xintest
+#
+# ------------------------------------ Node ------------------------------------
+#
+# Use a descriptive name for the node:
+#
+node:
+    name: node-3
+#
+# Add custom attributes to the node:
+#
+# node.rack: r1
+#
+# ----------------------------------- Paths ------------------------------------
+#
+# Path to directory where to store the data (separate multiple locations by comma):
+#
+path:
+    data: /data/vdb1/es-2.1.1/clusters/cluster_6/data
+#
+# Path to log files:
+#
+path:
+    logs: /data/vdb1/es-2.1.1/clusters/cluster_6/logs
+#
+# ----------------------------------- Memory -----------------------------------
+#
+# Lock the memory on startup:
+#
+bootstrap:
+    mlockall: true
+#
+# Make sure that the `ES_HEAP_SIZE` environment variable is set to about half the memory
+# available on the system and that the owner of the process is allowed to use this limit.
+#
+# Elasticsearch performs poorly when the system is swapping the memory.
+#
+# ---------------------------------- Network -----------------------------------
+#
+# Set the bind address to a specific IP (IPv4 or IPv6):
+#
+network:
+    host: 0.0.0.0
+#
+# Set a custom port for HTTP:
+#
+http:
+    port: 9200
+#
+# For more information, see the documentation at:
+#
+# ---------------------------------- Gateway -----------------------------------
+#
+# Block initial recovery after a full cluster restart until N nodes are started:
+#
+# gateway.recover_after_nodes: 3
+#
+# For more information, see the documentation at:
+#
+# --------------------------------- Discovery ----------------------------------
+#
+# Elasticsearch nodes will find each other via unicast, by default.
+#
+# Pass an initial list of hosts to perform discovery when new node is started:
+# The default list of hosts is ["127.0.0.1", "[::1]"]
+#
+discovery.zen.ping.unicast.hosts: ["es1", "es2", "es3"]
+#
+# Prevent the "split brain" by configuring the majority of nodes (total number of nodes / 2 + 1):
+#
+discovery.zen.minimum_master_nodes: 1
+#
+# For more information, see the documentation at:
+#
+# ---------------------------------- Various -----------------------------------
+#
+# Disable starting multiple nodes on a single system:
+#
+node.max_local_storage_nodes: 1
+#
+# Require explicit names when deleting indices:
+#
+# action.destructive_requires_name: true
+#
+# Marvel
+marvel:
+    agent:
+        exporters:
+            id1:
+                type: http
+                host: ["http://kafka3:9201"]
+# network
+transport:
+    tcp:
+        # 默认9300-9400
+        port: 9300
+# Index
+index:
+    translog:
+        # translog需要flush的大小，默认512mb，translog到达这个大小后，会触发flush
+        flush_threshold_size: 1gb
+        # 触发flush的操作数上限，默认无限制
+        #flush_threshold_ops: -1
+        # 触发flush的时长，默认30m
+        flush_threshold_period: 30m
+        # 检查flush是否必要的时间间隔，默认5s，实际的检查间隔，会在此值interval~2*interval之间随机浮动
+        interval: 5s
+        # es同步、提交translog的周期，默认5s
+        sync_interval: 10s
+        # es同步、提交translog的策略，默认request表示每次请求之后都进行同步、提交，async表示按照sync_interval参数指定的间隔进行同步、提交
+        durability: async
+        fs:
+            # translog写入64kB的缓存内存中，满了或者触发了同步或者sync_interval指定的时间间隔后写入请求到磁盘，simple表示立即写入文件系统不做缓存
+            type: buffered
+    merge:
+        scheduler:
+            # 机械磁盘，建议为1，SSD默认为max(1, min(4, processors/2)),32核场景下为4
+            max_thread_count: 6
+    store:
+        # 默认default，官方文档有错误，可选值：simplefs，niofs，mmapfs，default，linux下default为niofs和mmapfs的混合方式
+        type: mmapfs
+    shard: 
+        # es打开索引之前检查是否corruption，默认false，可选项：checksum，true，false，fix
+        check_on_startup: false
+    # 索引存储使用的数据压缩方式，默认值default，表示使用LZ4方式压缩，高压缩率可以考虑best_compression
+    codec: default
+    # 基于可用节点数目，自动扩展副本replicas的数目，默认false，配置方式：0-5，0-all
+    auto_expand_replicas: false
+    # 多久刷新操作来使最近对索引的变更对于搜索可见，默认1s，此参数会影响到query cache即shard request cache的缓存有效性
+    refresh_interval: 5s
+    # 返回结果的窗口最大值，默认10000，作为from + size的最大值
+    max_result_window: 10000
+    blocks:
+        read_only: false
+    # 主shard数目，默认5
+    number_of_shards: 2
+    # shard的副本数，默认1
+    number_of_replicas: 0
+    routing:
+        allocation:
+            # 默认-1，表示无限制，参数含义限制集群中单个节点存储任意一个index的任意类型shard（主or备份）的数目上限
+            total_shards_per_node: -1
+
+# Indices
+indices:
+    breaker:
+        total:
+            # 所有es的breaker的内存上限，默认70%
+            limit: 85%
+        fielddata:
+            # 字段数据的内存上限，默认60%
+            limit: 80%
+            # 预估系数，默认1.03
+            overhead: 1.03
+        request:
+            # 请求breaker的内存上限，默认40%
+            limit: 60%
+            overhead: 1
+    # search request的cache，shard-level request cache，缓存的开启针对索引或请求，大小设置针对节点，缓存search请求中size=0的
+    # 不缓存hits文档内容，缓存hits.total，聚合结果aggregations，推荐suggestions，针对聚合以及search_type为count的
+    requests:
+        cache:
+            # 索引的缓存，默认false不开启，这里设置应该无效，官方文档没有此设置，这里试一下而已，待删除 
+            enable: true
+            # 缓存大小，默认堆大小heap的1%
+            size: 10%
+            # 不要配置此参数，这里示范而已，cache缓存过期时间，仅仅为了设计的全面，cache会随着index的更新而自动失效
+            expire: 24h
+    # 缓存查询得到的结果，缓存filter上下文的查询，不缓存query上下文的查询结果，filtered query的查询结果也会缓存，节点级别配置
+    queries:
+        cache:
+            # es用于filter过滤器上下文的查询的缓存，静态配置，默认10%
+            size: 50%
+    # 针对排序、聚合计算的字段的数据字段缓存，默认无限大，务必低于断路器的字段数据limit上限大小配置
+    fielddata:
+        cache:
+            # 字段数据缓存，针对排序、字段聚合，默认-1，无限制，注意要设置为小于indices.breaker.fielddata.limit值的数据，否则无法淘汰旧数据
+            size: 70%
+            # 不要设置此参数，这里示范而已，默认无限制，设置此参数导致fielddata会过期，过期重建对于fielddata这种数据结构开销很大，严重影响性能
+            expire: 24h
+    ttl:
+        interval: 60s
+        bulk_size: 10000
+    memory:
+        # 存储新索引的文档的缓存大小，默认为heap堆内存的10%，缓存满了，才写segment到磁盘
+        index_buffer_size: 50%
+        # 索引缓存的最小值，默认48mb
+        min_index_buffer_size: 1gb
+        # 索引缓存的最大值，默认unbounded无限制
+        max_index_buffer_size: 16gb
+        # 每个shard最低的索引缓存，默认4mb
+        min_shard_index_buffer_size: 32mb
+    recovery:
+        # 每个节点并发网络恢复流，默认5
+        concurrent_streams: 5
+        # 每个节点并发小文件流恢复，默认2
+        concurrent_small_file_streams: 2
+
+# Cluster
+cluster:
+    routing:
+        allocation:
+            # 默认all，任意类型shard都进行allocation分配，可选：primaries, new_primaries, none
+            enable: all
+            # 一个节点上并发shard恢复数，默认2
+            node_concurrent_recoveries: 2
+            # 一个节点并发primary分片恢复数，默认4
+            node_initial_primaries_recoveries: 8
+            same_shard:
+                # 是否执行同主机存储同一个shard的primary和replics问题的检查，默认false
+                host: false
+            # 默认-1，表示无限制，参数含义限制集群中单个节点存储任意类型shard（主or备份）的数目上限，不限制index
+            total_shards_per_node: -1
+            disk:
+                # 是否开启磁盘分配决策器，默认true，用于决定是否分配新shard以及是否要主动移走shard
+                threshold_enabled: true
+                watermark:
+                    # 磁盘usage使用率的下水位线，默认85%，高于85%时，不会再分配新的shard了
+                    low: 90%
+                    # 磁盘usage使用率的上水位线，默认90%，高于90%时，会考虑重新分配shard了
+                    high: 95%
+                # 在计算磁盘使用率时是否将正在重新分配的shard考虑进内，默认true表示考虑，这会导致正在重新分配的shard的磁盘使用量被重复计算
+                include_relocations: true
+            balance:
+                # 集群中每个节点分配等量shard数的权重，默认0.45f
+                shard: 0.45f
+                # 集群中每个节点分配某index的等量shard数的权重，默认0.55f
+                index: 0.55f
+                # 阈值，默认1.0f，优化操作的优化值至少要大于此值，才能被执行，越大，优化执行越不积极，越小，越积极
+                threshold: 1.0f
+            # 默认indices_all_active，执行shard的rebalancing的时机，默认表示所有分片都已经allocated后才可以，可选：always, indices_primaries_active
+            allow_rebalance: indices_all_active
+            # 并发执行shard的rebalance的并发度，集群范围内的，默认2
+            cluster_concurrent_rebalance: 5
+            awareness:
+                # 部署意识
+                attributes: zone
+        rebalance:
+            # 是否开启shard的再平衡rebalancing，默认all表示所有类型的shard都能参与，可选：primaries, replicas, none
+            enable: all
+    info:
+        update:
+            # 磁盘使用率检查频率，默认30s时间间隔
+            interval: 1m
+
+# Node
+node:
+    zone: zone_3
+
+# ThreadPool
+threadpool:
+    generic:
+        type: cached
+        # 默认5m，es默认30s
+        keep_alive: 30s
+    force_merge: 
+        type: fixed
+        size: 1
+        # 排队请求队列长度，默认-1无限制，es默认未设置
+        queue_size: -1
+    percolate: 
+        type: fixed
+        # 线程数，默认为cpu核心数的5倍，es默认设置32
+        size: 32
+        queue_size: 1k
+    fetch_shard_started: 
+        type: scaling
+        min: 1
+        size: 64
+        keep_alive: 5m
+    listener: 
+        type: fixed
+        size: 10
+        queue_size: -1
+    index: 
+        type: fixed
+        # es设置默认32
+        size: 64
+        # es设置默认200
+        queue_size: 1k
+    refresh:
+        type: scaling
+        min: 1
+        # es默认10
+        size: 10
+        keep_alive: 5m
+    suggest:
+        type: fixed
+        size: 32
+        queue_size: 1k
+    # segment的热身操作线程池
+    warmer:
+        type: scaling
+        min: 1
+        # es默认设置5
+        size: 5
+        keep_alive: 5m
+    # 处理统计、搜索操作的线程池
+    search: 
+        type: fixed
+        # es默认49，计算方法为processors * 1.5 + 1
+        size: 64
+        # es默认1k
+        queue_size: 2k
+    flush: 
+        type: scaling
+        min: 1
+        # es默认设置5
+        size: 10
+        keep_alive: 5m
+    fetch_shard_store: 
+        type: scaling
+        min: 1
+        size: 64
+        keep_alive: 5m
+    management:
+        type: scaling
+        min: 1
+        size: 5
+        keep_alive: 5m
+    # get操作的线程池
+    get:
+        type: fixed
+        # es默认设置32
+        size: 32
+        # es默认1k
+        queue_size: 1k
+    # bulk操作的线程池
+    bulk:
+        type: fixed
+        # es默认设置32
+        size: 64
+        # es默认50
+        queue_size: 100
+    snapshot: 
+        type: scaling
+        min: 1
+        size: 5
+        keep_alive: 5m
+
+

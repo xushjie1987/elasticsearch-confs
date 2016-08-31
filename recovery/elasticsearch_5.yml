@@ -1,0 +1,195 @@
+# 替换为实际的集群名称，各ElasticSearch节点保持一致，且当前网段内不存在重名的其他ElasticSearch集群
+cluster:
+    name: xintest
+# 替换为实际的节点名称，各ElasticSearch节点保持集群内唯一
+node:
+    name: node-1
+# 替换为实际的数据存储路径，务必保障磁盘空间充足
+path:
+    data: /data/vdb1/es-2.1.1/clusters/cluster_8/data
+# 替换为实际的日志文件输出路径，务必保障磁盘空间充足
+path:
+    logs: /data/vdb1/es-2.1.1/clusters/cluster_8/logs
+
+bootstrap:
+    mlockall: true
+
+network:
+    host: 0.0.0.0
+
+http:
+    port: 9200
+# 替换为实际的ElasticSearch各节点主机名
+discovery.zen.ping.unicast.hosts: ["es1", "es2", "es3"]
+
+discovery.zen.minimum_master_nodes: 2
+
+node.max_local_storage_nodes: 1
+
+transport:
+    tcp:
+        port: 9300
+
+index:
+    translog:
+        flush_threshold_size: 1gb
+        flush_threshold_period: 30m
+        interval: 5s
+        sync_interval: 10s
+        durability: async
+        fs:
+            type: buffered
+    merge:
+        scheduler:
+            max_thread_count: 6
+    store:
+        type: mmapfs
+    shard: 
+        check_on_startup: false
+    codec: default
+    auto_expand_replicas: false
+    refresh_interval: 5s
+    max_result_window: 10000
+    blocks:
+        read_only: false
+    number_of_shards: 5
+    number_of_replicas: 0
+    routing:
+        allocation:
+            total_shards_per_node: -1
+    unassigned:
+        node_left:
+            delayed_timeout: 10m
+
+indices:
+    breaker:
+        total:
+            limit: 85%
+        fielddata:
+            limit: 80%
+            overhead: 1.03
+        request:
+            limit: 60%
+            overhead: 1
+    requests:
+        cache:
+            enable: true
+            size: 10%
+            expire: 24h
+    queries:
+        cache:
+            size: 50%
+    fielddata:
+        cache:
+            size: 70%
+            expire: 24h
+    ttl:
+        interval: 60s
+        bulk_size: 10000
+    memory:
+        index_buffer_size: 50%
+        min_index_buffer_size: 1gb
+        max_index_buffer_size: 16gb
+        min_shard_index_buffer_size: 32mb
+    recovery:
+        concurrent_streams: 5
+        concurrent_small_file_streams: 2
+
+cluster:
+    routing:
+        allocation:
+            enable: all
+            node_concurrent_recoveries: 2
+            node_initial_primaries_recoveries: 8
+            same_shard:
+                host: false
+            total_shards_per_node: -1
+            disk:
+                threshold_enabled: true
+                watermark:
+                    low: 90%
+                    high: 95%
+                include_relocations: true
+            balance:
+                shard: 0.45f
+                index: 0.55f
+                threshold: 1.0f
+            allow_rebalance: indices_all_active
+            cluster_concurrent_rebalance: 5
+        rebalance:
+            enable: all
+    info:
+        update:
+            interval: 1m
+
+threadpool:
+    generic:
+        type: cached
+        keep_alive: 30s
+    force_merge: 
+        type: fixed
+        size: 1
+        queue_size: -1
+    percolate: 
+        type: fixed
+        size: 32
+        queue_size: 1k
+    fetch_shard_started: 
+        type: scaling
+        min: 1
+        size: 64
+        keep_alive: 5m
+    listener: 
+        type: fixed
+        size: 10
+        queue_size: -1
+    index: 
+        type: fixed
+        size: 64
+        queue_size: 1k
+    refresh:
+        type: scaling
+        min: 1
+        size: 10
+        keep_alive: 5m
+    suggest:
+        type: fixed
+        size: 32
+        queue_size: 1k
+    warmer:
+        type: scaling
+        min: 1
+        size: 5
+        keep_alive: 5m
+    search: 
+        type: fixed
+        size: 64
+        queue_size: 2k
+    flush: 
+        type: scaling
+        min: 1
+        size: 10
+        keep_alive: 5m
+    fetch_shard_store: 
+        type: scaling
+        min: 1
+        size: 64
+        keep_alive: 5m
+    management:
+        type: scaling
+        min: 1
+        size: 5
+        keep_alive: 5m
+    get:
+        type: fixed
+        size: 32
+        queue_size: 1k
+    bulk:
+        type: fixed
+        size: 64
+        queue_size: 100
+    snapshot: 
+        type: scaling
+        min: 1
+        size: 5
+        keep_alive: 5m
