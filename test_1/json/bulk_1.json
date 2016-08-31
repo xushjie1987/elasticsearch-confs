@@ -1,0 +1,18 @@
+{ "index" : { "_index" : "test_2", "_type" : "logs", "_id": 1 } }
+{ "a1" : "value1" }
+{ "index" : { "_index" : "test_2", "_type" : "logs", "_id": 2 } }
+{ "a1" : "value2" }
+{ "index" : { "_index" : "test_2", "_type" : "logs", "_id": 3 } }
+{ "a1" : "value3" }
+{ "index" : { "_index" : "test_2", "_type" : "logs", "_id": 4 } }
+{ "a1" : "value4" }
+{ "index" : { "_index" : "test_2", "_type" : "logs", "_id": 5 } }
+{ "a1" : "value5" }
+{ "index" : { "_index" : "test_2", "_type" : "logs", "_id": 6 } }
+{ "a1" : "value6" }
+{ "index" : { "_index" : "test_2", "_type" : "logs", "_id": 7 } }
+{ "a1" : "value7" }
+{ "index" : { "_index" : "test_2", "_type" : "logs", "_id": 8 } }
+{ "a1" : "value8" }
+{ "index" : { "_index" : "test_2", "_type" : "logs", "_id": 9 } }
+{ "a1" : "value9" }
