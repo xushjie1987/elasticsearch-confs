@@ -1,0 +1,228 @@
+cluster:
+    name: elk
+path:
+    data: /data/elasticsearch/clusters/test_4/data/node2
+    logs: /data/elasticsearch/clusters/test_4/logs/node2
+    plugins: /app/elasticsearch/elasticsearch-2.1.1/plugins
+bootstrap:
+    mlockall: true
+node:
+    name: node2
+    master: true
+    data: true
+    max_local_storage_nodes: 5
+index:
+    number_of_shards: 15
+    number_of_replicas: 1
+    shard:
+        check_on_startup: checksum
+    codec: default
+    auto_expand_replicas: false
+    refresh_interval: 30s
+    max_result_window: 2147483647
+    blocks:
+        read_only: false
+        read: false
+        write: false
+        metadata: false
+    ttl:
+        disable_purge: false
+    recovery:
+        initial_shards: quorum
+    unassigned:
+        node_left:
+            delayed_timeout: 5m
+    merge:
+        scheduler:
+            max_thread_count: 4
+    search:
+        slowlog:
+            threshold:
+                query:
+                    warn: 5s
+                fetch:
+                    warn: 1s
+    indexing:
+        slowlog:
+            threshold:
+                index:
+                    warn: 5s
+            source: 1000
+    store:
+        type: default
+    translog:
+        flush_threshold_size: 64m
+        flush_threshold_period: 30m
+        interval: 5s
+        sync_interval: 5s
+        durability: async
+        fs:
+            type: buffered
+indices:
+    requests:
+        cache:
+            enable: true
+            size: 3%
+    queries:
+        cache:
+            size: 30%
+    fielddata:
+        cache:
+            size: 30%
+    memory:
+        index_buffer_size: 30%
+        min_index_buffer_size: 256m
+        max_index_buffer_size: 512m
+        min_shard_index_buffer_size: 4mb
+    recovery:
+        concurrent_streams: 5
+        concurrent_small_file_streams: 5
+        file_chunk_size: 1mb
+        translog_ops: 1000
+        translog_size: 512kb
+        compress: true
+        max_bytes_per_sec: 64mb
+    ttl:
+        interval: 2m
+        bulk_size: 10000
+    breaker:
+        total:
+            limit: 90%
+        fielddata:
+            limit: 60%
+            overhead: 1.03
+        request:
+            limit: 60%
+            overhead: 1
+network:
+    host: 0.0.0.0
+    bind_host: 0.0.0.0
+    publish_host: 10.128.33.135
+    tcp:
+        no_delay: true
+        keep_alive: true
+        reuse_address: true
+        send_buffer_size: 1mb
+        receive_buffer_size: 1mb
+transport:
+    tcp:
+        port: 9302
+        connect_timeout: 15s
+        compress: true
+    publish_port: 9302
+    bind_host: 0.0.0.0
+    publish_host: 10.128.33.135
+    host: 0.0.0.0
+http:
+    port: 9202
+    publish_port: 9202
+    bind_host: 0.0.0.0
+    publish_host: 10.128.33.135
+    host: 0.0.0.0
+    max_content_length: 100mb
+    max_initial_line_length: 4kb
+    max_header_size: 8kb
+    compression: true
+    compression_level: 6
+    cors:
+        enabled: true
+        allow-origin: "*"
+discovery:
+    zen:
+        ping:
+            unicast: 
+                hosts: ["10.128.33.135:9301-9305","127.0.0.1:9301-9305"]
+        ping_timeout: 5s
+        join_timeout: 60s
+        master_election:
+            filter_client: true
+            filter_data: false
+        minimum_master_nodes: 3
+        fd:
+            ping_interval: 1s
+            ping_timeout: 30s
+            ping_retries: 3
+        publish_timeout: 30s
+        no_master_block: write
+gateway:
+    expected_nodes: 0
+    expected_master_nodes: 0
+    expected_data_nodes: 0
+    recover_after_time: 5m
+    recover_after_nodes: 0
+    recover_after_master_nodes: 0
+    recover_after_data_nodes: 0
+threadpool:
+    generic:
+        type: cached
+        keep_alive: 30s
+    force_merge:
+        type: fixed
+        size: 1
+        queue_size: -1
+    percolate:
+        type: fixed
+        size: 16
+        queue_size: 1k
+    fetch_shard_started:
+        type: scaling
+        min: 1
+        size: 64
+        keep_alive: 5m
+    listener:
+        type: fixed
+        size: 10
+        queue_size: -1
+    index:
+        type: fixed
+        size: 16
+        queue_size: 1k
+    refresh:
+        type: scaling
+        min: 1
+        size: 10
+        keep_alive: 5m
+    suggest:
+        type: fixed
+        size: 16
+        queue_size: 1k
+    warmer:
+        type: scaling
+        min: 1
+        size: 5
+        keep_alive: 5m
+    search:
+        type: fixed
+        size: 25
+        queue_size: 2k
+    flush:
+        type: scaling
+        min: 1
+        size: 16
+        keep_alive: 5m
+    fetch_shard_store:
+        type: scaling
+        min: 1
+        size: 16
+        keep_alive: 5m
+    management:
+        type: scaling
+        min: 1
+        size: 5
+        keep_alive: 5m
+    get:
+        type: fixed
+        size: 16
+        queue_size: 1k
+    bulk:
+        type: fixed
+        size: 16
+        queue_size: 100
+    snapshot:
+        type: scaling
+        min: 1
+        size: 5
+        keep_alive: 5m
+
+
+
